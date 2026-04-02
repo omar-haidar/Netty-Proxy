@@ -103,7 +103,7 @@ public class ProxyService extends BaseService {
                 new NotificationCompat.Builder(this, CHANNEL_ID)
                         .setContentTitle("Netty Proxy active")
                         .setContentText(contentText)
-                        .setSmallIcon(R.drawable.ic_share)
+                        .setSmallIcon(R.drawable.ic_hub)
                         .setOngoing(true)
                         .setContentIntent(PendingIntent.getActivity(this,33,mainActivityIntent,Utils.getPendingIntentFlags()))
                         .build();
