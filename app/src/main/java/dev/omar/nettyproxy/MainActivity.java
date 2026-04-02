@@ -52,6 +52,8 @@ public class MainActivity extends AppCompatActivity {
                             updateUI();
                         });
         binding.fab.setOnClickListener(v -> toggleProxyServiceRunning());
+        binding.switchAutoStart.setChecked(App.get().getSettings().isStartupWithBoot());
+        binding.switchAutoStart.setOnCheckedChangeListener((cb,isChecked)->App.get().getSettings().setStartWithBoot(isChecked));
     }
 
     public void updateUI() {

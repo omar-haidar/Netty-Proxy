@@ -24,6 +24,7 @@ public final class ProxyController {
     }
 
     public void startProxyService(Context context) {
+        if(isRunningProxyService().getValue())return;
         startProxyServiceWithAction(context,ACTION_START_PROXY);
         isRunningProxyService.postValue(true);
     }

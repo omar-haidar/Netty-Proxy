@@ -22,6 +22,7 @@ import android.widget.HorizontalScrollView;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
+import dev.omar.nettyproxy.utils.Settings;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
@@ -43,12 +44,26 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class App extends Application {
 
     private static Handler MAIN_HANDLER = new Handler(Looper.getMainLooper());
+    private Settings mSettings;
+    private static volatile App sApp;
+
+    public Settings getSettings() {
+        if (mSettings == null) {
+            mSettings = new Settings(getApplicationContext());
+        }
+        return mSettings;
+    }
 
     @Override
     public void onCreate() {
         super.onCreate();
+        sApp = this;
         CrashHandler.getInstance().registerGlobal(this);
-        //CrashHandler.getInstance().registerPart(this);
+        // CrashHandler.getInstance().registerPart(this);
+    }
+
+    public static App get() {
+        return sApp;
     }
 
     public static void write(InputStream input, OutputStream output) throws IOException {
@@ -86,13 +101,15 @@ public class App extends Application {
         for (Closeable closeable : closeables) {
             try {
                 if (closeable != null) closeable.close();
-            } catch (IOException ignored) {}
+            } catch (IOException ignored) {
+            }
         }
     }
 
     public static class CrashHandler {
 
-        public static final UncaughtExceptionHandler DEFAULT_UNCAUGHT_EXCEPTION_HANDLER = Thread.getDefaultUncaughtExceptionHandler();
+        public static final UncaughtExceptionHandler DEFAULT_UNCAUGHT_EXCEPTION_HANDLER =
+                Thread.getDefaultUncaughtExceptionHandler();
 
         private static CrashHandler sInstance;
 
@@ -110,7 +127,8 @@ public class App extends Application {
         }
 
         public void registerGlobal(Context context, String crashDir) {
-            Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandlerImpl(context.getApplicationContext(), crashDir));
+            Thread.setDefaultUncaughtExceptionHandler(
+                    new UncaughtExceptionHandlerImpl(context.getApplicationContext(), crashDir));
         }
 
         public void unregister() {
@@ -148,16 +166,21 @@ public class App extends Application {
                     } catch (final Throwable e) {
                         e.printStackTrace();
                         if (isRunning.get()) {
-                            MAIN_HANDLER.post(new Runnable(){
+                            MAIN_HANDLER.post(
+                                    new Runnable() {
 
-                                    @Override
-                                    public void run() {
-                                        Toast.makeText(mContext, e.toString(), Toast.LENGTH_LONG).show();
-                                    }
-                                });
+                                        @Override
+                                        public void run() {
+                                            Toast.makeText(
+                                                            mContext,
+                                                            e.toString(),
+                                                            Toast.LENGTH_LONG)
+                                                    .show();
+                                        }
+                                    });
                         } else {
                             if (e instanceof RuntimeException) {
-                                throw (RuntimeException)e;
+                                throw (RuntimeException) e;
                             } else {
                                 throw new RuntimeException(e);
                             }
@@ -177,7 +200,10 @@ public class App extends Application {
 
             public UncaughtExceptionHandlerImpl(Context context, String crashDir) {
                 this.mContext = context;
-                this.mCrashDir = TextUtils.isEmpty(crashDir) ? new File(mContext.getExternalCacheDir(), "crash") : new File(crashDir);
+                this.mCrashDir =
+                        TextUtils.isEmpty(crashDir)
+                                ? new File(mContext.getExternalCacheDir(), "crash")
+                                : new File(crashDir);
             }
 
             @Override
@@ -202,7 +228,8 @@ public class App extends Application {
                     System.exit(0);
 
                 } catch (Throwable e) {
-                    if (DEFAULT_UNCAUGHT_EXCEPTION_HANDLER != null) DEFAULT_UNCAUGHT_EXCEPTION_HANDLER.uncaughtException(thread, throwable);
+                    if (DEFAULT_UNCAUGHT_EXCEPTION_HANDLER != null)
+                        DEFAULT_UNCAUGHT_EXCEPTION_HANDLER.uncaughtException(thread, throwable);
                 }
             }
 
@@ -212,18 +239,30 @@ public class App extends Application {
                 String versionName = "unknown";
                 long versionCode = 0;
                 try {
-                    PackageInfo packageInfo = mContext.getPackageManager().getPackageInfo(mContext.getPackageName(), 0);
+                    PackageInfo packageInfo =
+                            mContext.getPackageManager()
+                                    .getPackageInfo(mContext.getPackageName(), 0);
                     versionName = packageInfo.versionName;
-                    versionCode = Build.VERSION.SDK_INT >= 28 ? packageInfo.getLongVersionCode() : packageInfo.versionCode;
-                } catch (Throwable ignored) {}
+                    versionCode =
+                            Build.VERSION.SDK_INT >= 28
+                                    ? packageInfo.getLongVersionCode()
+                                    : packageInfo.versionCode;
+                } catch (Throwable ignored) {
+                }
 
                 LinkedHashMap<String, String> head = new LinkedHashMap<String, String>();
                 head.put("Time Of Crash", time);
                 head.put("Device", String.format("%s, %s", Build.MANUFACTURER, Build.MODEL));
-                head.put("Android Version", String.format("%s (%d)", Build.VERSION.RELEASE, Build.VERSION.SDK_INT));
+                head.put(
+                        "Android Version",
+                        String.format("%s (%d)", Build.VERSION.RELEASE, Build.VERSION.SDK_INT));
                 head.put("App Version", String.format("%s (%d)", versionName, versionCode));
                 head.put("Kernel", getKernel());
-                head.put("Support Abis", Build.VERSION.SDK_INT >= 21 && Build.SUPPORTED_ABIS != null ? Arrays.toString(Build.SUPPORTED_ABIS): "unknown");
+                head.put(
+                        "Support Abis",
+                        Build.VERSION.SDK_INT >= 21 && Build.SUPPORTED_ABIS != null
+                                ? Arrays.toString(Build.SUPPORTED_ABIS)
+                                : "unknown");
                 head.put("Fingerprint", Build.FINGERPRINT);
 
                 StringBuilder builder = new StringBuilder();
@@ -238,7 +277,7 @@ public class App extends Application {
                 builder.append("\n\n");
                 builder.append(Log.getStackTraceString(throwable));
 
-                return builder.toString(); 
+                return builder.toString();
             }
 
             private void writeLog(String log) {
@@ -248,7 +287,7 @@ public class App extends Application {
                     write(file, log.getBytes("UTF-8"));
                 } catch (Throwable e) {
                     e.printStackTrace();
-                } 
+                }
             }
 
             private static String getKernel() {
@@ -288,7 +327,10 @@ public class App extends Application {
             textView.setLinksClickable(true);
 
             horizontalScrollView.addView(textView);
-            contentView.addView(horizontalScrollView, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+            contentView.addView(
+                    horizontalScrollView,
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT);
 
             setContentView(contentView);
         }
@@ -312,7 +354,7 @@ public class App extends Application {
         @Override
         public boolean onCreateOptionsMenu(Menu menu) {
             menu.add(0, android.R.id.copy, 0, android.R.string.copy)
-                .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+                    .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
             return super.onCreateOptionsMenu(menu);
         }
 
@@ -320,7 +362,8 @@ public class App extends Application {
         public boolean onOptionsItemSelected(MenuItem item) {
             switch (item.getItemId()) {
                 case android.R.id.copy:
-                    ClipboardManager cm = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                    ClipboardManager cm =
+                            (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
                     cm.setPrimaryClip(ClipData.newPlainText(getPackageName(), mLog));
                     return true;
             }

@@ -21,8 +21,6 @@ import dev.omar.nettyproxy.proxy.netty.HttpProxyClientHandler;
 import dev.omar.nettyproxy.proxy.netty.HttpProxyClientHandlerFactory;
 import dev.omar.nettyproxy.proxy.netty.HttpProxyClientHeader;
 import dev.omar.nettyproxy.proxy.netty.HttpProxyServer;
-import dev.omar.nettyproxy.receivers.ControllerReceiver;
-import dev.omar.nettyproxy.utils.Utils;
 
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.socket.SocketChannel;
@@ -72,7 +70,7 @@ public class ProxyService extends Service {
 
     private void startProxy() {
         try {
-            wakeLock.acquire(10 * 60 * 1000L /*10 minutes*/);
+            wakeLock.acquire();
             HttpProxyClientHandlerFactory factory =
                     taskId -> {
                         HttpProxyClientHeader header = new HttpProxyClientHeader();
