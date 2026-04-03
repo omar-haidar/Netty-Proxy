@@ -3,15 +3,24 @@ package dev.omar.nettyproxy.utils;
 import android.Manifest;
 import android.app.Activity;
 import android.app.PendingIntent;
+import android.app.StatusBarManager;
+import android.content.ComponentName;
+import android.content.Context;
+import android.graphics.drawable.Icon;
 import android.os.Build;
+import android.widget.Toast;
 import androidx.core.app.ActivityCompat;
+import androidx.core.graphics.drawable.IconCompat;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import dev.omar.nettyproxy.MainActivity;
+import dev.omar.nettyproxy.R;
+import dev.omar.nettyproxy.services.tile.ProxyTileService;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.Enumeration;
+import java.util.concurrent.Executors;
 
 public final class Utils {
     public static final int REQ_POST_NOTIFICATION = 2002;
@@ -61,4 +70,5 @@ public final class Utils {
         }
         return flags;
     }
+
 }

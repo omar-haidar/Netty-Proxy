@@ -1,13 +1,11 @@
 package dev.omar.nettyproxy.services;
 
 import android.app.Notification;
-import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.app.Service;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.os.Build;
-import android.os.IBinder;
 import android.os.PowerManager;
 
 import androidx.core.app.NotificationCompat;
@@ -21,9 +19,10 @@ import dev.omar.nettyproxy.proxy.netty.HttpProxyClientHandler;
 import dev.omar.nettyproxy.proxy.netty.HttpProxyClientHandlerFactory;
 import dev.omar.nettyproxy.proxy.netty.HttpProxyClientHeader;
 import dev.omar.nettyproxy.proxy.netty.HttpProxyServer;
-
+import dev.omar.nettyproxy.services.tile.ProxyTileService;
 import dev.omar.nettyproxy.utils.NotificationHelper;
 import dev.omar.nettyproxy.utils.Utils;
+
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.socket.SocketChannel;
 
@@ -35,18 +34,20 @@ public class ProxyService extends BaseService {
     private static final int NOTIFICATION_ID = 1001;
 
     private IProxyServer proxyServer;
-    
+
     private final AtomicLong taskCounter = new AtomicLong(0);
-    
+
     private PowerManager.WakeLock wakeLock;
 
     @Override
     public void onCreate() {
         super.onCreate();
-        NotificationHelper.createNotificationChannel(this,CHANNEL_ID,NotificationManager.IMPORTANCE_LOW);
+        NotificationHelper.createNotificationChannel(
+                this, CHANNEL_ID, NotificationManager.IMPORTANCE_LOW);
         PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
         wakeLock =
                 powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "ProxyService::WakeLock");
+        updateTileOnServiceChange();
     }
 
     @Override
@@ -96,38 +97,49 @@ public class ProxyService extends BaseService {
         String ip = proxyServer.getIP();
 
         String contentText = "Running proxy : " + ip + ":" + proxyServer.getPort();
-        
-        Intent mainActivityIntent = new Intent(this,MainActivity.class);
-        mainActivityIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP|Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+        Intent mainActivityIntent = new Intent(this, MainActivity.class);
+        mainActivityIntent.setFlags(
+                Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         Notification notification =
                 new NotificationCompat.Builder(this, CHANNEL_ID)
                         .setContentTitle("Netty Proxy active")
                         .setContentText(contentText)
-                        .setSmallIcon(R.drawable.ic_hub)
+                        .setSmallIcon(R.drawable.icon_wifi_share)
                         .setOngoing(true)
-                        .setContentIntent(PendingIntent.getActivity(this,33,mainActivityIntent,Utils.getPendingIntentFlags()))
+                        .setContentIntent(
+                                PendingIntent.getActivity(
+                                        this,
+                                        33,
+                                        mainActivityIntent,
+                                        Utils.getPendingIntentFlags()))
                         .build();
 
         startForeground(NOTIFICATION_ID, notification);
     }
-    
+
     @Override
     public void onDestroy() {
+        updateTileOnServiceChange();
         stopProxy();
         super.onDestroy();
+    }
+
+    private void updateTileOnServiceChange() {
+        if(Build.VERSION.SDK_INT>=24){
+            ProxyTileService.requestListeningState(this,new ComponentName(this,ProxyTileService.class));
+        }
     }
 
     @SuppressWarnings("deprecation")
     private void stopProxy() {
         if (proxyServer != null && proxyServer.isRunningProxy()) {
             proxyServer.stopProxy();
-            proxyServer = null; 
+            proxyServer = null;
         }
         if (wakeLock.isHeld()) {
             wakeLock.release();
         }
         stopForeground(true);
     }
-
-    
 }
