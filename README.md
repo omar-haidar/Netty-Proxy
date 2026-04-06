@@ -8,6 +8,13 @@
 
 A high-performance proxy server for Android devices built with **Netty framework**. Turn your Android device into a fully functional HTTP/HTTPS proxy server with auto-start capabilities and authentication support.
 
+## Screenshots
+
+<div style="overflow: hidden">
+<img src="/assets/img/main.jpg" alt="Main" width="40%" align="bottom" />
+<img src="/assets/img/about.jpg" alt="About" width="40%" align="bottom" />
+</div>
+
 ## 📱 Features
 
 - 🚀 **High Performance** - Built with Netty's asynchronous event-driven architecture
