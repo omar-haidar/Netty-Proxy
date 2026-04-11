@@ -4,8 +4,14 @@
 # Ignore ACS editor directory
 .acside
 
+# Ignore AndroidIDE editor directory
+.androidide
+
 # Ignore Kotlin directory
 .kotlin
 
 # Ignore Gradle build output directory
 build
+
+# Ignore agent directory
+agent

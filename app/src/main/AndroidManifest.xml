@@ -48,7 +48,7 @@
             android:name="developer"
             android:value="OMAR HAIDAR" />
 
-        <activity android:name=".App$CrashActivity" />
+        <activity android:name="dev.omar.nettyproxy.ui.base.BaseApp$CrashActivity" />
 
         <service
             android:name="dev.omar.nettyproxy.services.ProxyService"

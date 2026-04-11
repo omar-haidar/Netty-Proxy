@@ -6,6 +6,7 @@ import android.os.Build;
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
+import dev.omar.nettyproxy.proxy.api.IProxyServer;
 import dev.omar.nettyproxy.services.ProxyService;
 
 public final class ProxyController {
@@ -18,7 +19,8 @@ public final class ProxyController {
 
     private static MutableLiveData<Boolean> isRunningProxyService =
             new MutableLiveData<Boolean>(false);
-
+private static MutableLiveData<ProxyServerProvider> proxyServerProviderLiveData =
+            new MutableLiveData<ProxyServerProvider>();
     public static synchronized ProxyController getInstance() {
         return INSTANCE;
     }
@@ -54,5 +56,23 @@ public final class ProxyController {
     }
     public LiveData<Boolean> isRunningProxyService() {
         return isRunningProxyService;
+    }
+
+    public interface ProxyServerProvider {
+        IProxyServer provideServer();
+    }
+
+    public void setProxyServerProvider(ProxyServerProvider provider) {
+    	if(provider!=null) {
+    		proxyServerProviderLiveData.postValue(provider);
+    	}
+    }
+    
+    public void removeProxyServerProvider() {
+    	proxyServerProviderLiveData.postValue(null);
+    }
+
+    public LiveData<ProxyServerProvider> getServerProvider() {
+    	return proxyServerProviderLiveData;
     }
 }

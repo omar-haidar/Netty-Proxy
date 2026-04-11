@@ -28,15 +28,12 @@ import io.netty.channel.socket.SocketChannel;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-public class ProxyService extends BaseService {
+public class ProxyService extends BaseService implements ProxyController.ProxyServerProvider {
 
     private static final String CHANNEL_ID = "NettyProxyChannel";
     private static final int NOTIFICATION_ID = 1001;
 
     private IProxyServer proxyServer;
-
-    private final AtomicLong taskCounter = new AtomicLong(0);
-
     private PowerManager.WakeLock wakeLock;
 
     @Override
@@ -48,6 +45,7 @@ public class ProxyService extends BaseService {
         wakeLock =
                 powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "ProxyService::WakeLock");
         updateTileOnServiceChange();
+        
     }
 
     @Override
@@ -74,18 +72,9 @@ public class ProxyService extends BaseService {
     private void startProxy() {
         try {
             wakeLock.acquire();
-            HttpProxyClientHandlerFactory factory =
-                    taskId -> {
-                        HttpProxyClientHeader header = new HttpProxyClientHeader();
-                        return new HttpProxyClientHandler("task-" + taskId, header);
-                    };
-
-            ChannelInitializer<SocketChannel> initializer =
-                    new HttpProxyChannelInitializer(taskCounter, factory);
-
-            proxyServer = new HttpProxyServer(initializer);
+            proxyServer = new HttpProxyServer();
             proxyServer.startProxy();
-
+            ProxyController.getInstance().setProxyServerProvider(this);
             showForegroundNotification();
 
         } catch (Exception e) {
@@ -126,8 +115,9 @@ public class ProxyService extends BaseService {
     }
 
     private void updateTileOnServiceChange() {
-        if(Build.VERSION.SDK_INT>=24){
-            ProxyTileService.requestListeningState(this,new ComponentName(this,ProxyTileService.class));
+        if (Build.VERSION.SDK_INT >= 24) {
+            ProxyTileService.requestListeningState(
+                    this, new ComponentName(this, ProxyTileService.class));
         }
     }
 
@@ -141,5 +131,10 @@ public class ProxyService extends BaseService {
             wakeLock.release();
         }
         stopForeground(true);
+    }
+
+    @Override
+    public IProxyServer provideServer() {
+        return proxyServer;
     }
 }

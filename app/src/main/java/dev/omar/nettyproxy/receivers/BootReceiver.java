@@ -7,6 +7,7 @@ import dev.omar.nettyproxy.proxy.ProxyController;
 import dev.omar.nettyproxy.utils.Settings;
 
 public class BootReceiver extends BroadcastReceiver {
+    
     private Settings mSettings;
 
     @Override

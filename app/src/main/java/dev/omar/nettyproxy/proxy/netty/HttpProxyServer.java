@@ -11,6 +11,7 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class HttpProxyServer implements IProxyServer {
 
@@ -20,9 +21,22 @@ public class HttpProxyServer implements IProxyServer {
     private EventLoopGroup workerGroup;
     private Thread serverThread;
     private volatile boolean isRunning = false;
+    private final AtomicLong taskCounter = new AtomicLong(0);
 
     public HttpProxyServer(ChannelInitializer<SocketChannel> channelInitializer) {
         this.channelInitializer = channelInitializer;
+    }
+
+    public HttpProxyServer() {
+        HttpProxyClientHandlerFactory factory =
+                taskId -> {
+                    HttpProxyClientHeader header = new HttpProxyClientHeader();
+                    return new HttpProxyClientHandler("task-" + taskId, header);
+                };
+
+        ChannelInitializer<SocketChannel> initializer =
+                new HttpProxyChannelInitializer(taskCounter, factory);
+        this.channelInitializer = initializer;
     }
 
     private void shutdown() {
@@ -69,8 +83,7 @@ public class HttpProxyServer implements IProxyServer {
                                         .channel(NioServerSocketChannel.class)
                                         .handler(
                                                 new LoggingHandler(
-                                                        LogLevel.INFO)) // يمكنك تغييره إلى DEBUG
-                                        // إذا أردت
+                                                        LogLevel.INFO)) 
                                         .childHandler(channelInitializer);
 
                                 b.bind(getPort()).sync().channel().closeFuture().sync();

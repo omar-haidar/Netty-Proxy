@@ -20,7 +20,6 @@ public class HttpProxyClientHandler extends ChannelInboundHandlerAdapter {
     private Channel clientChannel;
     private Channel remoteChannel;
 
-    // سنمرر الكائنات عبر الـ Constructor بدلاً من @Autowired
     private final HttpProxyClientHeader header;
     
     public HttpProxyClientHandler(String id, HttpProxyClientHeader header) {

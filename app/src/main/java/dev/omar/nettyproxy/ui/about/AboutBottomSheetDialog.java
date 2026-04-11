@@ -13,6 +13,7 @@ import dev.omar.nettyproxy.R;
 import dev.omar.nettyproxy.databinding.LayoutAboutBinding;
 
 public class AboutBottomSheetDialog extends BottomSheetDialogFragment {
+    
     private LayoutAboutBinding binding;
 
     @Override
@@ -20,8 +21,9 @@ public class AboutBottomSheetDialog extends BottomSheetDialogFragment {
         binding = LayoutAboutBinding.inflate(inflater, parent, false);
         return binding.getRoot();
     }
-
+    
     @Override
+    @SuppressWarnings("deprecation")
     public void onViewCreated(View view, Bundle bundle) {
         super.onViewCreated(view, bundle);
         

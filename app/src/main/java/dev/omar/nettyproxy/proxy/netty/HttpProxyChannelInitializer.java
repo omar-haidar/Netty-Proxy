@@ -8,7 +8,6 @@ import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import android.util.Log;
 
-/** Channel Initializer للـ HTTP Proxy - نسخة أندرويد */
 public class HttpProxyChannelInitializer extends ChannelInitializer<SocketChannel> {
 
     private static final String TAG = "ProxyChannelInitializer";
@@ -28,7 +27,6 @@ public class HttpProxyChannelInitializer extends ChannelInitializer<SocketChanne
         this.handlerFactory = handlerFactory;
     }
 
-    /** Constructor بسيط (إذا لم ترغب في استخدام Factory) */
     public HttpProxyChannelInitializer() {
         this(null, null);
     }
@@ -41,8 +39,7 @@ public class HttpProxyChannelInitializer extends ChannelInitializer<SocketChanne
             ch.pipeline()
                     .addLast(
                             new LoggingHandler(
-                                    LogLevel.INFO), // غير DEBUG إلى INFO لتقليل اللوغات على
-                            // الموبايل
+                                    LogLevel.INFO),
                             createClientHandler(taskId));
 
             Log.d(TAG, "تم تهيئة قناة جديدة - Task ID: " + taskId);
@@ -53,7 +50,6 @@ public class HttpProxyChannelInitializer extends ChannelInitializer<SocketChanne
         }
     }
 
-    /** إنشاء handler جديد لكل اتصال */
     private HttpProxyClientHandler createClientHandler(long taskId) {
         String taskName = "task-" + taskId;
         HttpProxyClientHeader header = new HttpProxyClientHeader(); // header جديد لكل اتصال

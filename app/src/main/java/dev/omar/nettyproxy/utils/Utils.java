@@ -6,10 +6,16 @@ import android.app.PendingIntent;
 import android.app.StatusBarManager;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.drawable.Icon;
+import android.net.Uri;
 import android.os.Build;
+import android.os.PowerManager;
+import android.provider.Settings;
 import android.widget.Toast;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.core.graphics.drawable.IconCompat;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import dev.omar.nettyproxy.MainActivity;
@@ -71,4 +77,26 @@ public final class Utils {
         return flags;
     }
 
+    public static boolean isIgnoringBatteryOptimizations(Context context) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            PowerManager manager = context.getSystemService(PowerManager.class);
+            return manager.isIgnoringBatteryOptimizations(context.getPackageName());
+        }
+        return true;
+    }
+
+    public static boolean hasNotificationPermissions(Context context) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            return ContextCompat.checkSelfPermission(
+                            context, Manifest.permission.POST_NOTIFICATIONS)
+                    == PackageManager.PERMISSION_GRANTED;
+        }
+        return true;
+    }
+
+    public static int getColorByStatus(Context context, boolean flag) {
+        return flag
+                ? ContextCompat.getColor(context, R.color.success)
+                : ContextCompat.getColor(context, R.color.error);
+    }
 }
