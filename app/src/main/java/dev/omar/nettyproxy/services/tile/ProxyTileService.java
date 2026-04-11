@@ -67,7 +67,7 @@ public class ProxyTileService extends TileService implements Observer<Boolean> {
         }
     }
     
-    @SuppressWarnings("deprecation")
+    @SuppressWarnings({"StartActivityAndCollapseDeprecated","deprecation"})
     private void startActivityAndCollapseCompat(Intent intent) {
         if(Build.VERSION.SDK_INT>=34) {
         	startActivityAndCollapse(PendingIntent.getActivity(getApplicationContext(),3003,intent,Utils.getPendingIntentFlags()));
